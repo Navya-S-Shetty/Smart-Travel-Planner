@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Your Premium Itinerary</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" 
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
+    
+   <style>
+        body { background: #0f172a; color: white; font-family: 'Poppins', sans-serif; scroll-behavior: smooth; }
+        .glass-panel { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        #map { height: 100vh; width: 50%; position: fixed; left: 0; top: 0; z-index: 10; }
+        .story-container { margin-left: 50%; width: 50%; padding: 3rem; position: relative; z-index: 20; }
+        
+        /* Premium Timeline */
+        .day-section { border-left: 2px solid rgba(249, 115, 22, 0.3); margin-left: 1rem; padding-left: 2rem; position: relative; }
+        .day-dot { position: absolute; left: -9px; top: 0; width: 16px; height: 16px; background: #f97316; border-radius: 50%; box-shadow: 0 0 15px #f97316; }
+        
+        /* Card Styling */
+        .stop-card { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); transition: all 0.3s ease; }
+        .stop-card:hover { transform: translateX(10px); background: rgba(255, 255, 255, 0.08); border-color: rgba(249, 115, 22, 0.4); }
+        .numbered-marker { text-align: center; }
+        
+        
+        .pulse {
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0%   { box-shadow: 0 0 0 0 rgba(255,255,255,0.6); }
+    70%  { box-shadow: 0 0 0 10px rgba(255,255,255,0); }
+    100% { box-shadow: 0 0 0 0 rgba(255,255,255,0); }
+}
+        
+    </style>
+</head>
+<body>
+
+    <div id="map"></div>
+
+    <div class="story-container">
+        <div class="glass-panel p-8 rounded-3xl shadow-2xl">
+            <h1 class="text-4xl font-bold mb-6 text-transparent bg-clip-text
+           bg-gradient-to-r from-orange-500 via-orange-400 to-rose-500">
+    Your Curated Journey
+</h1>
+
+
+            
+            <div id="ai-story" class="prose prose-invert text-gray-300 leading-relaxed space-y-4">
+                <div class="animate-pulse">Preparing your personalized itinerary...</div>
+            </div>
+
+          <!-- ACTION BUTTONS -->
+<div class="mt-6 flex flex-wrap items-center gap-3" id="actionButtons">
+
+<button id="shareBtn"
+class="h-11 px-6 rounded bg-green-500 text-white font-semibold
+hover:bg-green-600 transition flex items-center gap-2">
+<i class="fab fa-whatsapp text-lg"></i>
+Share on WhatsApp
+</button>
+
+<button id="showSaveInputBtn"
+class="h-11 px-6 rounded bg-orange-500 text-white font-semibold
+hover:bg-orange-600 transition flex items-center gap-2">
+<i class="fas fa-save"></i>
+Save Trip
+</button>
+
+<button onclick="window.print()"
+class="h-11 px-6 rounded bg-blue-500 text-white font-semibold
+hover:bg-blue-600 transition flex items-center gap-2">
+<i class="fas fa-file-pdf"></i>
+Download as PDF
+</button>
+
+<button onclick="window.location.href='index.html'"
+class="h-11 px-6 rounded bg-purple-500 text-white font-semibold
+hover:bg-purple-600 transition flex items-center gap-2">
+<i class="fas fa-map"></i>
+Create New Trip
+</button>
+
+<button id="viewTripsBtn"
+onclick="window.location.href='my-trips.html'"
+class="h-11 px-6 rounded bg-gray-600 text-white font-semibold
+hover:bg-gray-700 transition flex items-center gap-2">
+<i class="fas fa-folder-open"></i>
+View Saved Trips
+</button>
+
+</div>
+
+
+
+
+<!-- SAVE TRIP INPUT (HIDDEN BY DEFAULT) -->
+<div id="saveTripBox" class="mt-4 hidden flex items-center gap-3">
+
+    <input
+        id="tripNameInput"
+        type="text"
+        placeholder="Enter trip name"
+        class="h-11 px-4 w-64 rounded text-black
+               focus:outline-none focus:ring-2 focus:ring-orange-500"
+    />
+
+    <button id="confirmSaveTripBtn"
+        class="h-11 px-6 rounded bg-orange-500 text-white font-semibold
+               hover:bg-orange-600 transition">
+        Confirm Save
+    </button>
+
+</div>
+
+</div>
+
+        </div>
+   
+
+
+
+
+<script>
+    const showSaveBtn = document.getElementById("showSaveInputBtn");
+    const saveBox = document.getElementById("saveTripBox");
+    const confirmSaveBtn = document.getElementById("confirmSaveTripBtn");
+
+    showSaveBtn.addEventListener("click", () => {
+        saveBox.classList.toggle("hidden");
+        document.getElementById("tripNameInput").focus();
+    });
+
+    confirmSaveBtn.addEventListener("click", async () => {
+        const tripName = document.getElementById("tripNameInput").value.trim();
+
+        if (!tripName) {
+            alert("Please enter a trip name");
+            return;
+        }
+
+        const itineraryData = window.fullItineraryData;
+
+        const response = await fetch("/api/itinerary/save", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                tripName: tripName,
+                itineraryJson: JSON.stringify(itineraryData)
+            })
+        });
+
+        if (response.ok) {
+            alert("Trip saved successfully");
+            document.getElementById("tripNameInput").value = "";
+            saveBox.classList.add("hidden");
+        } else {
+            alert("Failed to save trip");
+        }
+    });
+    
+    document.getElementById("shareBtn").addEventListener("click", () => {
+
+        const data = window.fullItineraryData;
+
+        let msg = "MY TRIP PLAN\n\n";
+
+        data.itinerary.forEach(day => {
+
+            msg += "Day " + day.day + " - " + day.region + "\n";
+
+            day.stops.forEach(stop => {
+                msg += "- " + stop.name + "\n";
+            });
+
+            // ADD HOTELS
+            if (day.hotels && day.hotels.length > 0) {
+                msg += "\nHotels:\n";
+                day.hotels.forEach(hotel => {
+                    msg += "* " + hotel.name +
+                           " (Rs." + hotel.pricePerNight + " per room)\n";
+                });
+            }
+
+            msg += "\n";
+        });
+
+        msg += "Total Budget: Rs." +
+               data.finalTripTotal.toFixed(2);
+
+        const url =
+          "https://wa.me/?text=" +
+          encodeURIComponent(msg);
+
+        window.open(url, "_blank");
+    });
+
+
+</script>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+          <script src="https://unpkg.com/@mapbox/polyline"></script>
+          
+          
+          
+    
+    
+    <script>
+    const map = L.map('map').setView([12.9141, 74.8560], 8);
+
+ // FORCE TOP LAYER FOR MARKERS
+ map.createPane('markerPane');
+ map.getPane('markerPane').style.zIndex = 1000;
+const bounds = L.latLngBounds();
+const dayColors = [
+    '#ff5c8d', // Day 1 - Pink
+    '#3b82f6', // Day 2 - Blue
+    '#22c55e', // Day 3 - Green
+    '#f97316', // Day 4 - Orange
+    '#a855f7'  // Day 5 - Purple
+];
+
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+async function loadItinerary() {
+
+    const urlParams = new URLSearchParams(window.location.search);
+
+    const city = urlParams.get('city');
+    const category = urlParams.get('category');
+    const pace = urlParams.get('pace');
+    const start = urlParams.get('start');
+    const end = urlParams.get('end');
+    const companion = urlParams.get('companion');
+    
+    const hotelType = urlParams.get('hotelType'); // ← ADD THIS LINE HERE
+    const travelMode = urlParams.get('travelMode');
+
+
+
+
+    if (city && companion) {
+        document.querySelector('h1').innerHTML =
+            `Your Curated Journey <br>
+             <span class="text-xl text-gray-400 font-normal">
+             A ${companion}'s retreat in ${city}
+             </span>`;
+    }
+
+    try {
+    	const response = await fetch(
+    			`/api/itinerary/generate?city=${city}&category=${category}&pace=${pace}&start=${start}&end=${end}&companion=${companion}&hotelType=${hotelType}&travelMode=${travelMode}`,
+    			{ method: 'POST' }
+    			);
+
+
+        if (!response.ok) throw new Error("Backend error");
+
+        const data = await response.json();
+        window.fullItineraryData = data;
+
+
+        const itinerary = data.itinerary;
+
+        if (!itinerary || itinerary.length === 0) {
+            document.getElementById('ai-story').innerText =
+                "Your trip could not be generated.";
+            return;
+        }
+
+
+        // 🟢 TEXT ITINERARY
+        let storyHtml = "";
+        itinerary.forEach(day => {
+        	let weatherLine = "";
+        	if (day.weather) {
+        	    weatherLine = `
+        	        <div class="text-sm text-gray-400 mb-2">
+        	            ${getWeatherIcon(day.weather.condition)}
+        	            ${Math.round(day.weather.temperature)}°C · ${day.weather.condition}
+        	        </div>
+        	    `;
+        	}
+
+        	storyHtml += `
+        		<div class="relative mt-10">
+
+        		<h3 class="text-xl font-bold mb-4">
+        		Day ${day.day} – ${day.region}
+        		</h3>
+        		
+        		
+        		
+
+        	${weatherLine}
+        	<ul class="space-y-3 mb-6">`;
+
+
+        	day.stops.forEach((stop, i) => {
+
+        	storyHtml += `
+        	<li class="mb-3">
+        	    <div class="font-semibold">
+        	        📍 ${stop.name}
+        	        <span class="text-sm text-gray-400">(${stop.category})</span>
+        	    </div>
+
+        	    <div class="text-sm text-gray-400 ml-6 space-y-1">
+        	        ${stop.rating ? `⭐ Rating: ${stop.rating}` : ``}
+
+        	        ${(() => {
+        	            const open = stop.openingTime;
+        	            const close = stop.closingTime;
+
+        	            if (!open || open === "Not Specified") {
+        	                return `<div class="text-gray-500 italic">⏰ Timings not available</div>`;
+        	            }
+
+        	            if (
+        	                open === "Open all day" ||
+        	                open === "Open 24 Hours" ||
+        	                close === "Not Specified" ||
+        	                !close
+        	            ) {
+        	                return `<div>⏰ ${open}</div>`;
+        	            }
+
+        	            if (open === close) {
+        	                return `<div>⏰ ${open}</div>`;
+        	            }
+
+        	            return `<div>⏰ ${open} – ${close}</div>`;
+        	        })()}
+
+        	        ${stop.entryFee ? `<div>💰 ${stop.entryFee}</div>` : ``}
+        	    </div>
+        	</li>
+        	`;
+
+        	// 🔥 ADD travel info here
+        	if (day.segments && day.segments[i]) {
+
+        	storyHtml += `
+        	<p class="ml-10 text-sm text-gray-400">
+        	    Next stop:
+        	    ${day.segments[i].distanceKm.toFixed(1)} km |
+        	    ${day.segments[i].timeMin.toFixed(0)} mins
+        	</p>`;
+        	}
+        	
+        	
+        	// 🧭 GOOGLE MAPS NAVIGATION
+        	// 🧭 GOOGLE MAPS NAVIGATION (NAME BASED)
+        	if (day.stops[i+1]) {
+
+        	const sourceName =
+        	encodeURIComponent(stop.name + " " + day.region);
+
+        	const destName =
+        	encodeURIComponent(day.stops[i+1].name + " " + day.region);
+
+        	const navUrl =
+        	`https://www.google.com/maps/dir/${sourceName}/${destName}`;
+
+        	storyHtml += `
+        		<a href="${navUrl}" target="_blank"
+        		class="ml-10 mt-2 inline-flex items-center gap-2
+        		px-4 py-2 rounded-full
+        		bg-gradient-to-r from-blue-500 to-blue-600
+        		text-white text-sm font-semibold
+        		shadow-md hover:shadow-lg
+        		hover:scale-105 transition">
+
+        		<i class="fas fa-location-arrow"></i>
+        		Navigate
+        		</a>
+
+`;
+        	}
+        	 });
+        	storyHtml += `</ul>`;
+
+        	// 🍽️ RESTAURANTS (TOP RIGHT SMALL CARD)
+        	if(day.restaurants && day.restaurants.length > 0){
+
+        	storyHtml += `
+        	<div class="absolute top-0 right-0 mt-2">
+
+        	<div class="p-4 rounded-xl 
+        	bg-orange-500/10 border border-orange-500/30 
+        	w-80 text-sm">
+
+        	<p class="text-xs font-bold text-gray-400 uppercase mb-3">
+        	Nearby Restaurants 
+        	</p>
+        	`;
+
+        	day.restaurants.forEach(r => {
+
+        	let priceText = String(r.price).replace(/\s+/g,'');
+
+        	// FIX merged price
+        	if(!priceText.includes("-") && priceText.length === 6){
+        	priceText = priceText.slice(0,3)+" - "+priceText.slice(3);
+        	}
+
+        	const mapUrl =
+        	`https://www.google.com/maps/search/?api=1&query=` +
+        	encodeURIComponent(r.name + " " + day.region);
+
+        	storyHtml += `
+        	<div class="mb-3 border-b border-white/10 pb-2">
+
+        	<div class="font-semibold text-white">
+        	${r.name}
+        	</div>
+
+        	<div class="text-orange-400 text-xs mb-2">
+        	₹${priceText} / person
+        	</div>
+
+        	<a href="${mapUrl}" target="_blank"
+        	class="inline-block text-xs
+        	bg-blue-500 hover:bg-blue-600
+        	px-3 py-1 rounded-full text-white">
+        	📍 View on Map
+        	</a>
+
+        	</div>
+        	`;
+        	});
+
+        	storyHtml += `
+        	</div>
+        	</div>
+        	`;
+        	}
+
+        	   
+            // 🏨 HOTEL RECOMMENDATIONS (OPTIONAL)
+               if (day.hotels && day.hotels.length > 0) {
+               	storyHtml += `<div class="mt-10 ml-4">
+   <p class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">Recommended Stays</p>`;
+                   day.hotels.forEach(hotel => {
+                       const bookingUrl = `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(hotel.name + " " + day.region)}`;
+                       storyHtml += `
+                       	<div class="mb-6 p-5 rounded-xl bg-orange-500/5 border border-orange-500/20 flex justify-between items-center group hover:bg-orange-500/10 transition">
+                               <div>
+                                   <div class="font-bold text-white group-hover:text-orange-400 transition">${hotel.name}</div>
+                                   <div class="text-xs text-gray-400">${hotel.category} · <span class="text-orange-300">₹${hotel.pricePerNight}</span></div>
+                               </div>
+                               <a href="${bookingUrl}" target="_blank" class="px-5 py-2 rounded-full bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold shadow-lg shadow-orange-500/20 transition">Book Now</a>
+                           </div>`;
+                   });
+               }
+               storyHtml += `</div>`;
+// Closes day-section and outer wrapper
+        
+           });
+           
+           
+       
+           
+        	
+
+        	
+
+
+           
+         
+        
+     // ✅ 1. Show AI narration FIRST (only once)
+        if (data.narration && data.narration.length > 0) {
+            document.getElementById('ai-story').innerHTML =
+                `<p class="mb-6">${data.narration}</p>`;
+        } else {
+            document.getElementById('ai-story').innerHTML = "";
+        }
+
+        // ✅ 2. APPEND itinerary below narration
+        document.getElementById('ai-story').innerHTML += storyHtml;
+        
+        
+        
+     // ----------- BUDGET DISPLAY -------------
+
+        let budgetHTML = `<div class="mt-10 p-6 rounded-2xl glass">
+        <h2 class="text-xl font-bold text-orange-400 mb-4">💰 Budget Breakdown (Per Person)</h2>`;
+
+        data.itinerary.forEach(day => {
+
+            budgetHTML += `
+            <div class="mb-5 p-4 rounded-xl bg-white/5">
+                <h3 class="font-semibold text-lg mb-2">Day ${day.day}</h3>
+
+                <p>🍽 Food: ₹${day.foodCostPerPerson}</p>
+                <p>🚗 Transport: ₹${day.transportCost.toFixed(2)}  
+                Distance: ${day.distanceKm.toFixed(2)} km
+</p>
+                <p>🎟 Entry Fees: ₹${day.entryFeeTotal}</p>
+                <p>🏨 Hotel: ₹${day.hotelCost}</p>
+
+                <p class="mt-2 font-bold text-orange-400">
+                    Daily Total: ₹${day.dailyTotal.toFixed(2)}
+                </p>
+            </div>`;
+        });
+
+        budgetHTML += `
+        <div class="mt-4 text-xl font-bold text-green-400">
+            Final Trip Cost: ₹${data.finalTripTotal.toFixed(2)}
+        </div>
+        </div>`;
+
+        document.getElementById('ai-story').innerHTML += budgetHTML;
+
+
+
+        // 🟢 MAP MARKERS
+     // 🟢 MAP MARKERS + POLYLINES
+     // 🟢 MAP MARKERS + NUMBERED STOPS + POLYLINES
+        let globalCount = 1;
+
+itinerary.forEach((day, dayIndex) => {
+	
+	console.log("DAY OBJECT =", day);
+    console.log("POLYLINE VALUE =", day.polyline);
+
+    // SORT (important)
+
+day.stops.forEach((stop) => {
+
+        const color = dayColors[dayIndex % dayColors.length];
+
+        const numberIcon = L.divIcon({
+            className: 'numbered-marker',
+            html: `<div style="
+                background:${color};
+                color:white;
+                width:34px;
+                height:34px;
+                border-radius:50%;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                font-weight:bold;
+                font-size:14px;
+                border:3px solid white;
+                box-shadow:0 0 8px rgba(0,0,0,0.5);
+            ">${globalCount}</div>`,
+            iconSize: [34, 34],
+            iconAnchor: [17, 17]
+        });
+
+
+        const offsetLat = stop.lat + (Math.random() * 0.00015);
+        const offsetLng = stop.lng + (Math.random() * 0.00015);
+
+        const marker = L.marker([offsetLat, offsetLng], { 
+
+            icon: numberIcon,
+            pane: 'markerPane'   // 👈 FORCE TOP LAYER
+        }).addTo(map);
+
+
+        marker.bindPopup(`
+
+                <b>${globalCount}. ${stop.name}</b><br>
+                ${stop.category}<br>
+                <small>Day ${dayIndex + 1}</small>
+            `);
+
+        bounds.extend(marker.getLatLng());
+        globalCount++;
+    });
+
+         // POLYLINE
+if (day.polyline) {
+
+    console.log("FRONTEND POLYLINE =", day.polyline);
+
+    console.log("POLYLINE RAW =", day.polyline);
+
+    const decoded = window.polyline.decode(day.polyline);
+
+
+
+                const latlngs = decoded.map(p => [p[0], p[1]]);
+
+                const color = dayColors[dayIndex % dayColors.length];
+
+                const routeLine = L.polyline(latlngs, {
+                    color: color,
+                    weight: 5
+                }).addTo(map);
+
+                routeLine.bringToBack();
+
+
+                bounds.extend(routeLine.getBounds());
+
+
+
+                bounds.extend(routeLine.getBounds());
+            }
+
+            });
+
+
+            // ✅ AUTO-FIT (MUST BE HERE)
+            if (bounds.isValid()) {
+                map.fitBounds(bounds, {
+                    padding: [40, 40]
+                });
+            }
+
+            } catch (err) {
+                console.error(err);
+                document.getElementById('ai-story').innerText =
+                    "Failed to load itinerary.";
+            }
+
+            } // end of loadItinerary()
+            function renderItinerary(data) {
+
+                const itinerary = data.itinerary;
+                let storyHtml = "";
+
+                itinerary.forEach(day => {
+
+                    storyHtml += `
+                    <div class="mb-16">
+                        <h2 class="text-xl font-bold mb-3">
+                            Day ${day.day} – ${day.region}
+                        </h2>
+                    `;
+
+                    day.stops.forEach((stop, i) => {
+
+    storyHtml += `
+        <p class="ml-4 text-gray-300">
+            📍 ${stop.name}
+        </p>
+    `;
+
+    // show distance & time to next stop
+    if (day.segments && day.segments[i]) {
+
+        storyHtml += `
+            <p class="ml-10 text-sm text-gray-400">
+                Next stop:
+                ${day.segments[i].distanceKm.toFixed(1)} km |
+                ${day.segments[i].timeMin.toFixed(0)} mins
+            </p>
+        `;
+    }
+});
+                    
+                    
+                    
+                 // 🍽️ RESTAURANTS
+                    if(day.restaurants && day.restaurants.length > 0){
+
+                        storyHtml += `
+                        <div class="mt-4 ml-6">
+                            <h4 class="text-orange-400 font-semibold">
+                                Nearby Restaurants (Per Person)
+                            </h4>
+                        `;
+
+                        day.restaurants.forEach(r => {
+                            storyHtml += `
+                                <div class="text-sm text-gray-400 ml-4">
+                                    • ${r.name} – ₹${r.price}/person
+                                </div>
+                            `;
+                        });
+
+                        storyHtml += `</div>`;
+                    }
+
+
+
+
+                    // HOTELS
+                    if (day.hotels && day.hotels.length > 0) {
+
+                        storyHtml += `
+                        <div class="mt-4 ml-4">
+                            <p class="text-xs font-bold text-gray-500 uppercase mb-3">
+                                Recommended Stays
+                            </p>
+                        `;
+
+                        day.hotels.forEach(hotel => {
+
+                            const bookingUrl =
+                            `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(hotel.name + " " + day.region)}`;
+
+                            storyHtml += `
+                            <div class="mb-4 p-4 rounded-xl 
+                                bg-orange-500/5 border border-orange-500/20 
+                                flex justify-between items-center">
+
+                                <div>
+                                    <div class="font-bold text-white">
+                                        ${hotel.name}
+                                    </div>
+                                    <div class="text-xs text-gray-400">
+                                        ${hotel.category} · 
+                                        <span class="text-orange-300">
+                                        ₹${hotel.pricePerNight}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <a href="${bookingUrl}" target="_blank"
+                                   class="px-5 py-2 rounded-full 
+                                   bg-orange-500 hover:bg-orange-600 
+                                   text-white text-xs font-bold transition">
+                                    Book
+                                </a>
+                            </div>
+                            `;
+                        });
+
+                        storyHtml += `</div>`;
+                    }
+
+                    storyHtml += `</div>`;
+                });
+
+                // 🔥 BUDGET PART (unchanged logic)
+                let budgetHTML = `
+                <div class="mt-10 p-6 rounded-2xl glass">
+                    <h2 class="text-xl font-bold text-orange-400 mb-4">
+                        💰 Budget Breakdown (Per Person)
+                    </h2>`;
+
+                data.itinerary.forEach(day => {
+
+                    budgetHTML += `
+                    <div class="mb-5 p-4 rounded-xl bg-white/5">
+                        <h3 class="font-semibold text-lg mb-2">
+                            Day ${day.day}
+                        </h3>
+
+                        <p>🍽 Food: ₹${day.foodCostPerPerson}</p>
+                        <p>🚗 Transport: ₹${day.transportCost}
+                        Distance: ${day.distanceKm.toFixed(2)} km</p>
+                        <p>🎟 Entry Fees: ₹${day.entryFeeTotal}</p>
+                        <p>🏨 Hotel: ₹${day.hotelCost}</p>
+
+                        <p class="mt-2 font-bold text-orange-400">
+                            Daily Total: ₹${day.dailyTotal.toFixed(2)}
+                        </p>
+                    </div>`;
+                });
+
+                budgetHTML += `
+                    <div class="mt-4 text-xl font-bold text-green-400">
+                        Final Trip Cost: ₹${data.finalTripTotal.toFixed(2)}
+                    </div>
+                </div>`;
+
+                document.getElementById("ai-story").innerHTML =
+                    storyHtml + budgetHTML;
+            }
+
+           
+
+            function getWeatherIcon(condition) {
+                condition = condition.toLowerCase();
+
+                if (condition.includes("rain")) return "🌧️";
+                if (condition.includes("cloud")) return "☁️";
+                if (condition.includes("clear")) return "☀️";
+                if (condition.includes("storm")) return "⛈️";
+                if (condition.includes("snow")) return "❄️";
+
+                return "🌤️";
+            }
+            
+            
+            (function () {
+                const params = new URLSearchParams(window.location.search);
+                const fromSaved = params.get("from") === "saved";
+
+                if (fromSaved) {
+
+                    // ❌ HIDE buttons ONLY in saved trip view
+                    document.getElementById("showSaveInputBtn").style.display = "none";
+                    document.getElementById("viewTripsBtn").style.display = "none";
+                   
+
+                    const savedTrip = localStorage.getItem("savedTrip");
+
+                    if (!savedTrip) {
+                        document.getElementById("ai-story").innerText =
+                            "Saved trip not found.";
+                        return;
+                    }
+
+                    let parsedData;
+                    try {
+                        parsedData = JSON.parse(savedTrip);
+                    } catch (e) {
+                        document.getElementById("ai-story").innerText =
+                            "Saved trip data is corrupted.";
+                        return;
+                    }
+
+
+                    renderItinerary(parsedData);
+
+                    setTimeout(() => {
+
+                        // Reduce gap after stop list
+                        document.querySelectorAll("#ai-story ul").forEach(ul => {
+                            ul.style.marginBottom = "1rem";
+                        });
+
+                        // Space before first day
+                        const firstDay = document.querySelector("#ai-story h2");
+                        if (firstDay) firstDay.style.marginTop = "2rem";
+
+                        // ---- FIX HOTEL BOXES ONLY ----
+                        document.querySelectorAll("#ai-story p.text-xs").forEach(label => {
+
+                            if (label.innerText.includes("Recommended")) {
+
+                                const hotelContainer = label.parentElement;
+
+                                hotelContainer.querySelectorAll("div").forEach(card => {
+
+                                    card.style.display = "flex";
+                                    card.style.justifyContent = "space-between";
+                                    card.style.alignItems = "center";
+                                    card.style.padding = "1rem";
+                                    card.style.marginBottom = "1rem";
+
+                                    const btn = card.querySelector("a");
+                                    if(btn){
+                                        btn.style.marginTop = "0";
+                                    }
+                                });
+                            }
+                        });
+
+                        // Booking link fix
+                        document.querySelectorAll("#ai-story a").forEach(link => {
+
+                            const hotelName = link
+                                .closest("div")
+                                ?.querySelector("div")
+                                ?.innerText
+                                ?.split("\n")[0];
+
+                            if (!hotelName) return;
+
+                            link.href =
+                              `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(hotelName)}`;
+                            link.target = "_blank";
+                        });
+
+                    }, 100);
+
+
+
+                } else {
+
+                    // ✔ normal itinerary creation
+                    loadItinerary();
+
+                }
+            })();
+
+
+
+            
+        </script>
+
+
+</body>
+
+
+
+</html>

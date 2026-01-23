@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TripPlanner | Login</title>
+    <link rel="stylesheet" href="explore/explore.css">
+</head>
+<body style="background-color: #0b1120; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; font-family: sans-serif;">
+
+    <div style="background: #161b22; padding: 40px; border-radius: 24px; width: 400px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.05);">
+        
+        <h2 style="color: white; margin-bottom: 10px; font-weight: 600;">Welcome Back!</h2>
+        <p style="color: #00d4ff; margin-bottom: 30px; font-size: 14px;">Please login to access your Hub</p>
+        
+        
+        <script>
+        if (window.location.search.includes("error")) {
+            document.write('<p style="color: #ff4444; font-size: 14px; margin-bottom: 15px;">Invalid username or password!</p>');
+        }
+    </script>
+        <form action="/login" method="POST" style="display: flex; flex-direction: column; gap: 15px;">
+            
+            <input type="text" name="username" placeholder="Username" 
+                   style="padding: 14px; border-radius: 12px; border: none; background: #21262d; color: white; width: 100%; box-sizing: border-box;" required>
+            
+            <input type="password" name="password" placeholder="Password" 
+                   style="padding: 14px; border-radius: 12px; border: none; background: #21262d; color: white; width: 100%; box-sizing: border-box;" required>
+            
+            <button type="submit" style="background: #ff5722; color: white; padding: 14px; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 16px;">
+                Login to Hub
+            </button>
+        </form>
+        
+        <p style="margin-top: 25px; color: #8b949e; font-size: 14px;">
+            New user? <a href="signup.html" style="color: #ff5722; text-decoration: none; font-weight: bold;">Sign up</a>
+        </p>
+    </div>
+
+</body>
+</html>

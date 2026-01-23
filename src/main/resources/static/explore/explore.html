@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TripPlanner | Premium Explore</title>
+    
+<link rel="stylesheet" href="explore.css?v=20.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+    <nav class="glass-nav">
+        <a href="../index.html" class="back-link"><i class="fa-solid fa-arrow-left"></i> Home</a>
+        <div class="user-status" style="display: flex; align-items: center; gap: 15px;">
+    <span id="usernameDisplay">
+        <i class="fa-solid fa-user-circle"></i> Guest Planner
+    </span>
+    <a href="/logout" id="logoutBtn" style="display: none; color: #ff6b35; text-decoration: none; font-size: 14px; font-weight: bold; border: 1px solid #ff6b35; padding: 5px 12px; border-radius: 20px;">
+        <i class="fa-solid fa-right-from-bracket"></i> Logout
+    </a>
+</div>
+    </nav>
+
+    <header class="explore-header">
+        <h1 class="premium-title">Discovery Hub</h1>
+        <p class="subtitle">Curated experiences for every vibe</p>
+        
+        <div class="filter-group">
+    <button class="filter-btn active" data-filter="all">All</button>
+    <button class="filter-btn" data-filter="beaches"><i class="fa-solid fa-umbrella-beach"></i> Beaches</button>
+    <button class="filter-btn" data-filter="temple"><i class="fa-solid fa-place-of-worship"></i> Temples</button>
+    <button class="filter-btn" data-filter="nature"><i class="fa-solid fa-leaf"></i> Nature</button>
+    <button class="filter-btn" data-filter="heritage"><i class="fa-solid fa-landmark"></i> Heritage</button>
+</div>
+    </header>
+
+    <main class="explore-grid" id="exploreGrid">
+        </main>
+
+<div class="bucket-bar" id="bucketBar" style="display:none;">
+        <div class="bucket-content">
+            <div class="bucket-stats">
+                <span class="day-badge"><i class="fa-solid fa-calendar-days"></i> <span id="totalDays">0</span> Days Total</span>
+            </div>
+            <div class="bucket-items" id="bucketItems">
+                </div>
+            <button class="generate-btn" onclick="syncWithBackend()">
+                Generate Itinerary <i class="fa-solid fa-wand-magic-sparkles"></i>
+            </button>
+        </div>
+    </div>
+
+    <script src="explore.js"></script>
+    
+   <script>
+    fetch('/api/user/me')
+        .then(response => {
+            if (!response.ok) throw new Error('Not logged in');
+            return response.text();
+        })
+        .then(name => {
+            document.getElementById('usernameDisplay').innerHTML = 
+                `<i class="fa-solid fa-user-circle"></i> ${name}`;
+        })
+        .catch(err => {
+            console.log("Using default Guest name");
+            document.getElementById('usernameDisplay').innerHTML = 
+                `<i class="fa-solid fa-user-circle"></i> Guest Planner`;
+        });
+</script>
+
+
+</body>
+</html>

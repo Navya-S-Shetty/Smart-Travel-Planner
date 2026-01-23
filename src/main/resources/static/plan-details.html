@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Craft Your Journey | TripPlanner</title>
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: radial-gradient(circle at top, #1f2933, #020617);
+            color: white;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .card-active {
+            border: 2px solid #ff7a18;
+            box-shadow: 0 0 25px rgba(255, 122, 24, 0.45);
+            transform: scale(1.03);
+        }
+
+        .interest-card:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+
+<body class="min-h-screen flex items-center justify-center p-6">
+
+<div class="glass max-w-5xl w-full rounded-3xl p-10 shadow-2xl">
+
+    <!-- HEADER -->
+    <div class="text-center mb-12">
+        <h1 class="text-4xl font-semibold">
+            Customize Your <span id="city-name" class="text-orange-400 underline">City</span> Experience
+        </h1>
+        <p class="text-gray-400 mt-3">
+            Routes powered by OSRM · Travel made simple
+        </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+
+        <!-- LEFT -->
+        <div class="space-y-10">
+
+            <!-- INTERESTS -->
+            <div>
+                <label class="block mb-5 text-sm tracking-widest uppercase text-gray-400">
+                    Select Interests (Multiple allowed)
+                </label>
+
+                <div class="grid grid-cols-2 gap-4" id="category-grid">
+
+                    <!-- ROW 1 -->
+                    <div class="glass interest-card p-4 rounded-2xl cursor-pointer transition"
+                         onclick="selectCategory('beaches', this)">
+                        <span class="text-2xl">🏖️</span>
+                        <p class="mt-2 text-sm">Beaches</p>
+                    </div>
+
+                    <div class="glass interest-card p-4 rounded-2xl cursor-pointer transition"
+                         onclick="selectCategory('sightseeing', this)">
+                        <span class="text-2xl">📸</span>
+                        <p class="mt-2 text-sm">Sightseeing</p>
+                    </div>
+
+                    <!-- ROW 2 -->
+                    <div class="glass interest-card p-4 rounded-2xl cursor-pointer transition"
+                         onclick="selectCategory('adventure', this)">
+                        <span class="text-2xl">🧗</span>
+                        <p class="mt-2 text-sm">Adventure</p>
+                    </div>
+
+                    <div class="glass interest-card p-4 rounded-2xl cursor-pointer transition"
+                         onclick="selectCategory('temple', this)">
+                        <span class="text-2xl">🙏</span>
+                        <p class="mt-2 text-sm">Temple</p>
+                    </div>
+
+                    <!-- ROW 3 -->
+                    <div class="glass interest-card p-4 rounded-2xl cursor-pointer transition"
+                         onclick="selectCategory('heritage', this)">
+                        <span class="text-2xl">🏛️</span>
+                        <p class="mt-2 text-sm">Heritage</p>
+                    </div>
+
+                   
+
+                    <!-- ROW 4 -->
+                    <div class="glass interest-card p-4 rounded-2xl cursor-pointer transition"
+                         onclick="selectCategory('nightlife', this)">
+                        <span class="text-2xl">🌙</span>
+                        <p class="mt-2 text-sm">Nightlife</p>
+                    </div>
+
+                    <div class="glass interest-card p-4 rounded-2xl cursor-pointer transition"
+                         onclick="selectCategory('shopping', this)">
+                        <span class="text-2xl">🛍️</span>
+                        <p class="mt-2 text-sm">Shopping</p>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- PACE -->
+            <div>
+                <label class="block mb-4 text-sm tracking-widest uppercase text-gray-400">
+                    Travel Pace
+                </label>
+
+                <div class="flex gap-4">
+                    <button onclick="setPace('Relaxed', this)"
+                            class="pace-btn glass px-6 py-2 rounded-full text-xs hover:bg-orange-500 transition">
+                        Relaxed
+                    </button>
+
+                    <button onclick="setPace('Balanced', this)"
+    class="pace-btn glass px-6 py-2 rounded-full text-xs border border-orange-500/40 hover:bg-orange-500/20 transition">
+    Balanced
+</button>
+
+
+                    <button onclick="setPace('Packed', this)"
+                            class="pace-btn glass px-6 py-2 rounded-full text-xs hover:bg-orange-500 transition">
+                        Packed
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- RIGHT -->
+        <div class="space-y-10">
+
+            <!-- DATES & COMPANION -->
+            <div>
+                <label class="block mb-4 text-sm tracking-widest uppercase text-gray-400">
+                    Trip Duration
+                </label>
+
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <input type="date" id="start-date"
+                           class="bg-slate-900 border border-white/10 rounded-xl p-3 text-xs">
+                    <input type="date" id="end-date"
+                           class="bg-slate-900 border border-white/10 rounded-xl p-3 text-xs">
+                </div>
+
+                <label class="block mb-2 text-sm tracking-widest uppercase text-gray-400">
+                    Companions
+                </label>
+
+                <select id="companion-type"
+                        class="w-full bg-slate-900 border border-white/10 rounded-xl p-3 text-sm">
+                    <option>Solo Traveler</option>
+                    <option>Couple</option>
+                    <option>Family with Kids</option>
+                    <option>Group of Friends</option>
+                </select>
+                
+                <label class="block mt-6 mb-2 text-sm tracking-widest uppercase text-gray-400">
+    Hotel Type
+</label>
+
+<select id="hotelType"
+class="w-full bg-slate-900 border border-white/10 rounded-xl p-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-orange-500">
+
+    <option value="">Select hotel type (Optional)</option>
+    <option value="budget">Budget</option>
+    <option value="mid-range">Mid Range</option>
+    <option value="premium">Premium</option>
+</select>
+
+
+
+<label class="block mt-6 mb-2 text-sm tracking-widest uppercase text-gray-400">
+    Travel Mode
+</label>
+
+<select id="travel-mode"
+        class="w-full bg-slate-900 border border-white/10 rounded-xl p-3 text-sm">
+    <option value="">Select travel mode</option>
+<option value="bike">Own Bike</option>
+<option value="car">Own Car</option>
+<option value="public">Public Transport</option>
+
+</select>
+
+                
+            </div>
+
+            <!-- INSIGHT -->
+            <div class="glass p-6 rounded-2xl border-l-4 border-orange-500">
+                <h3 class="font-semibold text-orange-400">Smart Planning</h3>
+<p class="text-xs text-gray-400 mt-2">
+    Your itinerary adapts based on interests, pace & companions.
+</p>
+
+            </div>
+
+            <!-- BUTTON -->
+            <button onclick="generatePlan()"
+                    class="w-full bg-gradient-to-r from-orange-500 to-pink-600 p-4 rounded-xl font-bold hover:scale-105 transition shadow-lg">
+                Generate Premium Itinerary
+            </button>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    let selectedCategories = [];
+    let selectedPace = '';
+
+    function selectCategory(cat, el) {
+        if (selectedCategories.includes(cat)) {
+            selectedCategories = selectedCategories.filter(c => c !== cat);
+            el.classList.remove('card-active');
+        } else {
+            selectedCategories.push(cat);
+            el.classList.add('card-active');
+        }
+    }
+
+    function setPace(pace, el) {
+        selectedPace = pace;
+
+        document.querySelectorAll('.pace-btn').forEach(btn => {
+            btn.classList.remove(
+                'card-active',
+                'bg-orange-500/20',
+                'border-orange-500'
+            );
+            btn.classList.add('border-orange-500/40');
+        });
+
+        el.classList.add(
+            'card-active',
+            'bg-orange-500/20',
+            'border-orange-500'
+        );
+    }
+
+
+    function generatePlan() {
+        const params = new URLSearchParams(window.location.search);
+        const city = params.get('city') || 'Mangalore';
+
+        const start = document.getElementById('start-date').value;
+        const end = document.getElementById('end-date').value;
+        const companion = document.getElementById('companion-type').value;
+        const hotelType = document.getElementById('hotelType').value;
+        const travelMode = document.getElementById('travel-mode').value;
+
+        if (selectedCategories.length === 0) {
+            alert("Please select at least one interest");
+            return;
+        }
+        if (!start || !end) {
+            alert("Please select start and end dates");
+            return;
+        }
+
+        if (!selectedPace) {
+            alert("Please select travel pace");
+            return;
+        }
+
+        if (!travelMode) {
+            alert("Please select travel mode");
+            return;
+        }
+
+        window.location.href =
+            `/results.html?city=${city}` +
+            `&category=${selectedCategories.join(',')}` +
+            `&pace=${selectedPace}` +
+            `&start=${start}` +
+            `&end=${end}` +
+            `&companion=${encodeURIComponent(companion)}` +
+            `&hotelType=${hotelType}` +
+            `&travelMode=${travelMode}`;
+;
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const params = new URLSearchParams(window.location.search);
+        const city = params.get('city');
+        if (city) document.getElementById('city-name').innerText = city;
+
+        // ✅ SET DEFAULT PACE = Balanced
+        
+    });
+
+</script>
+
+</body>
+</html>

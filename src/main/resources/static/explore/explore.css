@@ -1,0 +1,189 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap');
+
+/* Basic Setup */
+* { 
+    margin: 0; padding: 0; box-sizing: border-box; 
+    font-family: 'Poppins', sans-serif; 
+}
+
+body { 
+    background-color: #080808; 
+    color: #fff; 
+    overflow-x: hidden; 
+    /* Increased this so you can scroll past the bucket bar */
+    padding-bottom: 100px; 
+}
+/* Nav & Header Styling */
+.glass-nav { 
+    position: fixed;
+    top: 0;
+    width: 100%;
+    height: 80px;
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center;
+    padding: 0 80px; 
+    backdrop-filter: blur(20px); /* Increased blur */
+    background: rgba(8, 8, 8, 0.9); /* More solid black (0.9 instead of 0.8) */
+    z-index: 2000;
+}
+
+.back-link { 
+    text-decoration: none; color: #fff; 
+    font-weight: 600; transition: 0.3s; 
+}
+
+.back-link:hover { color: #ff6b35; }
+
+.explore-header {
+    padding-top: 60px; /* Gives space below the nav */
+    margin-top: 80px;  /* Moves the whole section down */
+    text-align: center;
+    padding-bottom: 20px;
+    position: relative;
+    z-index: 10;
+}
+
+.glass-nav { 
+    position: fixed; /* Changed from sticky to fixed for better stability */
+    top: 0;
+    width: 100%;
+    height: 80px;
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center;
+    padding: 0 80px; 
+    backdrop-filter: blur(15px); 
+    background: rgba(8, 8, 8, 0.8); /* Darker tint to reduce the blur mess */
+    z-index: 2000; /* Highest priority */
+}
+
+.premium-title { 
+    font-size: 48px; font-weight: 800; 
+    background: linear-gradient(to bottom, #fff, #888); 
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; 
+}
+
+/* Category Filters */
+.filter-group { display: flex; justify-content: center; gap: 15px; margin-top: 25px; }
+
+.filter-btn { 
+    padding: 10px 20px; border-radius: 50px; 
+    border: 1px solid rgba(255,255,255,0.1); 
+    background: rgba(255,255,255,0.05); color: #fff; 
+    cursor: pointer; transition: 0.4s; 
+}
+
+.filter-btn.active { 
+    background: #ff6b35; border-color: #ff6b35; 
+    box-shadow: 0 0 15px rgba(255,107,53,0.4); 
+}
+
+/* The Grid & Premium Destination Cards */
+/* Update your explore-grid with these exact lines */
+/* REPLACE Line 41 to 50 with this */
+.explore-grid { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); 
+    gap: 30px; 
+    /* This 300px ensures the cards can lift entirely above the blur */
+    padding: 20px 80px 300px 80px; 
+    width: 100%;
+}
+.p-card { 
+    height: 450px; border-radius: 24px; 
+    position: relative; overflow: hidden; 
+    background: #111; border: 1px solid rgba(255,255,255,0.05); 
+    transition: 0.5s cubic-bezier(0.2, 1, 0.3, 1); 
+}
+
+.p-card:hover { transform: translateY(-10px); border-color: #ff6b35; }
+
+.p-card img { 
+    width: 100%; height: 100%; 
+    object-fit: cover; transition: 0.8s; 
+}
+
+.p-card:hover img { transform: scale(1.1); filter: brightness(0.7); }
+
+.card-overlay { 
+    position: absolute; inset: 0; 
+    display: flex; flex-direction: column; 
+    justify-content: flex-end; padding: 30px; 
+    background: linear-gradient(to top, rgba(0,0,0,0.9), transparent 70%); 
+}
+
+.card-overlay h3 { font-size: 24px; margin-bottom: 5px; }
+
+.add-trip-btn { 
+    background: #ff6b35; color: #fff; 
+    border: none; padding: 12px; border-radius: 12px; 
+    cursor: pointer; font-weight: 600; 
+    margin-top: 10px; transition: 0.3s; 
+}
+
+/* THE FLOATING BUCKET BAR (Glassmorphism) */
+.bucket-bar {
+    position: fixed;
+    bottom: 30px;
+    z-index: 2000;
+    /* Increase opacity to 0.95 so the blur looks clean, not messy */
+    background: rgba(15, 15, 15, 0.95);
+    backdrop-filter: blur(25px);
+}
+.bucket-content { display: flex; justify-content: space-between; align-items: center; }
+
+.day-badge { 
+    background: #ff6b35; padding: 8px 18px; 
+    border-radius: 50px; font-weight: 700; font-size: 14px; 
+}
+
+.bucket-items { 
+    display: flex; gap: 12px; 
+    overflow-x: auto; max-width: 50%; 
+}
+
+.mini-card { 
+    display: flex; align-items: center; 
+    gap: 8px; background: rgba(255,255,255,0.1); 
+    padding: 5px 12px; border-radius: 50px; 
+    font-size: 11px; white-space: nowrap; 
+}
+
+.mini-card img { width: 25px; height: 25px; border-radius: 50%; object-fit: cover; }
+
+.generate-btn { 
+    background: #fff; color: #000; border: none; 
+    padding: 12px 25px; border-radius: 50px; 
+    font-weight: 700; cursor: pointer; transition: 0.3s; 
+}
+
+
+/* Ensure the bucket items don't break the layout */
+.bucket-items {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    scrollbar-width: none; /* Hides scrollbar in Firefox */
+}
+.bucket-items::-webkit-scrollbar { display: none; } /* Hides scrollbar in Chrome/Safari */
+
+.generate-btn:hover { background: #ff6b35; color: #fff; transform: scale(1.05); }
+
+
+.explore-btn{
+    background: white;
+    color: black;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.explore-btn:hover{
+    background: #ff6b35;
+    color: white;
+    transition: 0.3s;
+}
