@@ -1,6 +1,6 @@
 # Smart Travel Planner
 
-Smart Travel Planner is a Spring Boot based web application developed to help users plan trips efficiently.
+Smart Travel Planner is a Spring Boot–based web application designed to help users plan trips efficiently.
 
 ## Tech Stack
 - Java
@@ -12,9 +12,9 @@ Smart Travel Planner is a Spring Boot based web application developed to help us
 - Eclipse IDE
 
 ## About
-This project is built using Spring Boot.
-Maven is used to manage dependencies and build the project.
-The application was developed and run using Eclipse IDE.
+This project is developed using Spring Boot for backend development.
+Maven is used for dependency management and build automation.
+The application was developed and executed using Eclipse IDE.
 
 ## Build & Run Steps
 
@@ -35,7 +35,7 @@ The application was developed and run using Eclipse IDE.
 3. Import the project  
    File → Import → Existing Maven Project
 
-4. Configure database in  
+4. Configure the database in  
    src/main/resources/application.properties
 
 5. Build the project  
@@ -44,13 +44,13 @@ The application was developed and run using Eclipse IDE.
 6. Run the application  
    Right click TripplannerApplication.java → Run As → Spring Boot App
 
-7. Open browser  
+7. Open the browser  
    http://localhost:8080
 
 ## Notes
-- Maven is used only for build and dependency management.
-- Spring Boot is used to run the application.
-- Database credentials and API keys should be configured locally.
+- Maven is used for build and dependency management
+- Spring Boot is used to run the application
+- Database credentials and API keys must be configured locally
 
 ## Author
 Navya S Shetty
