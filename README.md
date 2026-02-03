@@ -5,11 +5,14 @@ Smart Travel Planner is a Spring Boot–based web application designed to help u
 ## Tech Stack
 - Java
 - Spring Boot
+- Hibernate
 - Maven
 - MySQL
 - HTML
 - CSS
+- JavaScript
 - Eclipse IDE
+  
 
 ## About
 This project is developed using Spring Boot for backend development.
