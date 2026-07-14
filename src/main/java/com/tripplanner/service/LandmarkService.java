@@ -12,12 +12,12 @@ public class LandmarkService {
     @Autowired
     private LandmarkRepository landmarkRepository;
 
-    // Save global landmark (admin / data entry)
+    
     public Landmark saveLandmark(Landmark landmark) {
         return landmarkRepository.save(landmark);
     }
 
-    // Fetch landmarks by city (used by itinerary planner)
+    
     public List<Landmark> getLandmarksByCity(String city) {
         return landmarkRepository.findByCityIgnoreCase(city);
     }
