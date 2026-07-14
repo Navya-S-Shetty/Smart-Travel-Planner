@@ -23,8 +23,7 @@ public class Landmark {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    // ===== Getters & Setters =====
-
+    
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -53,7 +52,7 @@ public class Landmark {
     public void setDescription(String description) { this.description = description; }
     
     
- // ✅ ADD THESE (DO NOT TOUCH EXISTING)
+
     private Double rating;
 
     @Column(name = "opening_time")
@@ -68,7 +67,6 @@ public class Landmark {
     
     
     
- // ===== NEW Getters & Setters =====
 
     public Double getRating() {
         return rating;
