@@ -79,7 +79,6 @@ public class ItineraryService {
 
             String fee = feeObj.toString().toLowerCase().trim();
 
-            // ignore free / permit / budget
             if (fee.contains("free") ||
                 fee.contains("permit") ||
                 fee.contains("budget") ||
@@ -87,27 +86,25 @@ public class ItineraryService {
                 continue;
             }
 
-            // remove everything except numbers and dash
             fee = fee.replaceAll("[^0-9–-]", "");
 
             try {
 
-                // range case 100–250
                 if (fee.contains("–") || fee.contains("-")) {
 
                     String[] parts = fee.split("[–-]");
                     double min = Double.parseDouble(parts[0]);
                     double max = Double.parseDouble(parts[1]);
 
-                    total += (min + max) / 2; // average
+                    total += (min + max) / 2; 
                 } 
                 else {
-                    // single value ₹10
+                    
                     total += Double.parseDouble(fee);
                 }
 
             } catch (Exception e) {
-                // skip bad formats
+               
             }
         }
 
@@ -161,7 +158,7 @@ public class ItineraryService {
                             .filter(l -> userCategories.contains(l.getCategory().toLowerCase()))
                             .count();
 
-                    return Long.compare(c2, c1); // DESCENDING
+                    return Long.compare(c2, c1); 
                 })
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toList());
@@ -169,9 +166,7 @@ public class ItineraryService {
     }
 
 
-    /* =========================
-       MAIN ENTRY METHOD
-       ========================= */
+    
     public Map<String, Object> buildFinalItinerary(
             String city,
             String category,
@@ -180,13 +175,12 @@ public class ItineraryService {
             String end,
             String companion,
             String hotelType ,
-            String travelMode// ✅ NEW (optional)
+            String travelMode
     )
 
  {
     	
-    	// ✅ NORMALIZE hotelType (FIX FOR MID-RANGE)
-    	// ✅ NORMALIZE hotelType for DB matching
+    
     	
     	boolean userSelectedHotel = false;
 
@@ -217,7 +211,7 @@ public class ItineraryService {
 
 
 
-        /* -------- 1. DATE & PACE -------- */
+        
         LocalDate startDate = LocalDate.parse(start);
         LocalDate endDate = LocalDate.parse(end);
 
@@ -229,8 +223,7 @@ public class ItineraryService {
             default -> 4; // balanced
         };
 
-        /* -------- 2. FETCH LANDMARKS -------- */
-     // 1️⃣ Fetch landmarks
+      
         List<Landmark> allLandmarks =
                 landmarkRepository.findByCityIgnoreCase(city.trim());
 
@@ -238,7 +231,7 @@ public class ItineraryService {
             return Map.of("itinerary", Collections.emptyList());
         }
 
-        // 2️⃣ User categories
+       
         List<String> userCategories = Arrays.stream(category.split(","))
                 .map(String::trim)
                 .map(String::toLowerCase)
@@ -246,16 +239,16 @@ public class ItineraryService {
                 .collect(Collectors.toList());
         
         
-     // 🔁 Copy for rotation (DO NOT MODIFY userCategories directly)
+    
         List<String> rotatedCategories = new ArrayList<>(userCategories);
 
 
-        // 3️⃣ Group by region
+      
         Map<String, List<Landmark>> regionMap =
                 allLandmarks.stream()
                         .collect(Collectors.groupingBy(Landmark::getRegion));
 
-        // 4️⃣ Order regions
+       
         List<String> orderedRegions =
                 userCategories.isEmpty()
                 ? orderRegionsByDistance(regionMap)
@@ -265,12 +258,11 @@ public class ItineraryService {
         
         
 
-        // 5️⃣ Day-wise planning
         List<Map<String, Object>> dailyPlans = new ArrayList<>();
 
         for (int day = 0; day < Math.min(totalDays, orderedRegions.size()); day++) {
         	
-        	// 🔄 Rotate categories so skipped one comes next day
+        
         	Collections.rotate(rotatedCategories, -1);
 
 
@@ -282,7 +274,7 @@ public class ItineraryService {
             
             
             if (userCategories.isEmpty()) {
-                // No category selected → purely priority-based plan
+               
                 regionPlaces.stream()
                         .sorted(Comparator.comparingInt(Landmark::getPriority))
                         .limit(placesPerDay)
@@ -290,7 +282,7 @@ public class ItineraryService {
             } else {
 
        
-            // ---------- A. FAIR CATEGORY DISTRIBUTION ----------
+         
             int baseQuota = placesPerDay / userCategories.size();
             int remainder = placesPerDay % userCategories.size();
 
@@ -314,7 +306,7 @@ public class ItineraryService {
                 selected.addAll(matches);
             }
 
-            // ---------- B. CONTROLLED FALLBACK ----------
+         
             if (selected.size() < placesPerDay) {
 
                 List<Landmark> fallback = regionPlaces.stream()
@@ -329,7 +321,7 @@ public class ItineraryService {
             }
             }
 
-            // ---------- C. ROUTE OPTIMIZATION ----------
+        
             Map<String, Object> routeData = optimizeRouteWithPolyline(selected);
 
             List<Landmark> optimizedStops =
@@ -356,7 +348,7 @@ public class ItineraryService {
             dayPlan.put("stops", convertToMapList(optimizedStops));
             dayPlan.put("polyline", polyline);
             dayPlan.put("segments", segments);
-         // 🍽️ Nearby restaurants
+       
             List<Map<String, Object>> restaurants =
                     getNearbyRestaurants(region);
 
@@ -364,7 +356,7 @@ public class ItineraryService {
 
 
             
-         // 🏨 HOTEL RECOMMENDATION (OPTIONAL)
+     
             List<Map<String, Object>> hotelsForRegion =
                     (totalDays == 1 || !userSelectedHotel)
                         ? List.of()
@@ -383,7 +375,7 @@ public class ItineraryService {
 
 
 
-            // ✅ NOW attach hotels
+     
             dayPlan.put("hotels", hotelsForRegion);
 
             
@@ -391,7 +383,7 @@ public class ItineraryService {
 
             
             
-         // 🌦️ WEATHER (use first stop of the day)
+        
             Landmark firstStop = optimizedStops.get(0);
 
             JSONObject weather = weatherService.getWeather(
@@ -402,7 +394,7 @@ public class ItineraryService {
             String condition = weather
                     .getJSONArray("weather")
                     .getJSONObject(0)
-                    .getString("main");   // Sunny / Rain / Clouds
+                    .getString("main");   
 
             double temperature = weather
                     .getJSONObject("main")
@@ -483,7 +475,7 @@ public class ItineraryService {
                             .collect(Collectors.toList()));
 
 
-            // ✅ DEBUG (TEMPORARY)
+           
             System.out.println("DAY " + (day + 1));
             System.out.println("USER CATEGORIES = " + userCategories);
             System.out.println("FINAL CATEGORIES = " +
@@ -524,9 +516,7 @@ public class ItineraryService {
         }
     
 
-    /* =========================
-       REGION ORDERING LOGIC
-       ========================= */
+  
     private List<String> orderRegionsByDistance(Map<String, List<Landmark>> regionMap) {
 
         Map<String, double[]> centroids = new HashMap<>();
@@ -574,9 +564,7 @@ public class ItineraryService {
         return ordered;
     }
 
-    /* =========================
-       HAVERSINE DISTANCE
-       ========================= */
+    
     private double haversine(double lat1, double lon1, double lat2, double lon2) {
         final double R = 6371; // Earth radius km
         double dLat = Math.toRadians(lat2 - lat1);
@@ -590,9 +578,6 @@ public class ItineraryService {
         return 2 * R * Math.asin(Math.sqrt(a));
     }
 
-    /* =========================
-       OSRM ROUTE OPTIMIZATION
-       ========================= */
     private Map<String, Object> optimizeRouteWithPolyline(List<Landmark> stops) {
     	
     	System.out.println(">>> optimizeRouteWithPolyline CALLED <<<");
@@ -611,9 +596,7 @@ public class ItineraryService {
         }
 
         try {
-            // 1️⃣ Build coordinates in DAY ORDER
-        	// REMOVE DUPLICATES FIRST
-        	// 1️⃣ REMOVE DUPLICATES
+          
         	List<Landmark> uniqueStops = stops.stream()
         	    .collect(Collectors.collectingAndThen(
         	        Collectors.toMap(
@@ -624,16 +607,16 @@ public class ItineraryService {
         	        m -> new ArrayList<>(m.values())
         	    ));
 
-        	// 2️⃣ SORT NEAREST FIRST
+        
         	List<Landmark> reorderedStops = sortNearest(uniqueStops);
 
-        	// 3️⃣ BUILD COORDS USING SORTED ORDER
+        	
         	String coords = reorderedStops.stream()
         	    .map(l -> l.getLongitude() + "," + l.getLatitude())
         	    .collect(Collectors.joining(";"));
 
 
-            // ✅ route API (LOCAL OSRM)
+           
             
             
         	String url =
@@ -647,7 +630,7 @@ public class ItineraryService {
             System.out.println("OSRM RAW RESPONSE = " + response);
             JSONObject json = new JSONObject(response);
 
-            // ✅ CORRECT response parsing
+           
             JSONObject route = json
                     .getJSONArray("routes")
                     .getJSONObject(0);
@@ -657,7 +640,7 @@ public class ItineraryService {
             double distanceKm =
                     route.getDouble("distance") / 1000;
 
-            // 🔥 ADD THIS
+          
             JSONArray legs = route.getJSONArray("legs");
 
             List<Map<String, Object>> segments = new ArrayList<>();
@@ -680,7 +663,7 @@ public class ItineraryService {
             }
 
 
-         // ROUTE API DOES NOT REORDER – KEEP SAME ORDER
+         
             
             
             
@@ -690,7 +673,7 @@ public class ItineraryService {
             result.put("polyline", polyline);
             result.put("distanceKm", distanceKm);
 
-            // 🔥 ADD THIS
+          
             result.put("segments", segments);
             System.out.println("SEGMENTS FROM OSRM = " + segments);
 
@@ -703,13 +686,28 @@ public class ItineraryService {
 
         } catch (Exception e) {
 
-            e.printStackTrace(); // <-- ADD THIS
+    e.printStackTrace();
 
-            Map<String, Object> fallback = new HashMap<>();
-            fallback.put("stops", stops);
-            fallback.put("polyline", null);
-            return fallback;
-        }
+    double distanceKm = 0;
+
+   
+    for (int i = 0; i < stops.size() - 1; i++) {
+        distanceKm += haversine(
+                stops.get(i).getLatitude(),
+                stops.get(i).getLongitude(),
+                stops.get(i + 1).getLatitude(),
+                stops.get(i + 1).getLongitude()
+        );
+    }
+
+    Map<String, Object> fallback = new HashMap<>();
+    fallback.put("stops", stops);
+    fallback.put("polyline", null);
+    fallback.put("distanceKm", distanceKm);
+    fallback.put("segments", Collections.emptyList());
+
+    return fallback;
+}
 
     }
     
@@ -718,21 +716,19 @@ public class ItineraryService {
     
 
 
-    /* =========================
-       RESPONSE MAPPER
-       ========================= */
+  
     private List<Map<String, Object>> convertToMapList(List<Landmark> list) {
         return list.stream().map(l -> {
             Map<String, Object> m = new HashMap<>();
 
-            // EXISTING (DO NOT CHANGE)
+           
             m.put("name", l.getName());
             m.put("category", l.getCategory());
             m.put("lat", l.getLatitude());
             m.put("lng", l.getLongitude());
             m.put("region", l.getRegion());
 
-            // ✅ NEW FIELDS FROM DB
+           
             m.put("rating", l.getRating());
             m.put("openingTime", l.getOpeningTime());
             m.put("closingTime", l.getClosingTime());
@@ -740,57 +736,6 @@ public class ItineraryService {
 
             return m;
         }).collect(Collectors.toList());
-    }
-
-    
-    
-    
-    
-    
-    
-    private String generateNarrationWithGroq(List<Map<String, Object>> itinerary) {
-
-        try {
-            String prompt = """
-            You are given a finalized travel itinerary in JSON.
-            Do NOT add, remove, reorder, or modify any place or day.
-            Only convert the itinerary into a simple, professional travel narration.
-            Keep it concise and friendly.
-            JSON:
-            """ + itinerary.toString();
-
-            Map<String, Object> request = new HashMap<>();
-            request.put("model", "llama3-8b-8192");
-            request.put("messages", List.of(
-                    Map.of("role", "user", "content", prompt)
-            ));
-            request.put("temperature", 0.4);
-
-            String GROQ_API_KEY = "YOUR_GROQ_API_KEY";
-
-            org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
-            headers.set("Authorization", "Bearer " + GROQ_API_KEY);
-            headers.set("Content-Type", "application/json");
-
-            org.springframework.http.HttpEntity<Map<String, Object>> entity =
-                    new org.springframework.http.HttpEntity<>(request, headers);
-
-            String response = restTemplate.postForObject(
-                    "https://api.groq.com/openai/v1/chat/completions",
-                    entity,
-                    String.class
-            );
-
-            JSONObject json = new JSONObject(response);
-            return json
-                    .getJSONArray("choices")
-                    .getJSONObject(0)
-                    .getJSONObject("message")
-                    .getString("content");
-
-        } catch (Exception e) {
-            return ""; // SAFE FALLBACK
-        }
     }
 
     
@@ -864,12 +809,12 @@ public class ItineraryService {
         return landmarkRepository
             .findByRegionAndCategoryIgnoreCase(region, "Food")
             .stream()
-            .limit(3)   // ONLY 3 restaurants
+            .limit(3)   
             .map(l -> {
                 Map<String, Object> m = new HashMap<>();
                 m.put("name", l.getName());
 
-                // your DB price stored in entryFee
+              
                 double price = 300;
 
                 try {
