@@ -13,12 +13,10 @@ public class AuthController {
     @Autowired
     private UserService userService;
 
-    // This matches the 'action="/register"' in your HTML form
     @PostMapping("/register")
     public String handleSignup(@ModelAttribute User user) {
         userService.registerNewUser(user);
         
-        // After saving, send them to the login page
         return "redirect:/login.html?success"; 
     }
 }
