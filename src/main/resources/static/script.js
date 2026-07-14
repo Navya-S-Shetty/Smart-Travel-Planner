@@ -4,7 +4,7 @@ const cardsDiv = document.getElementById("cards");
 
 
 
-// ===== WISHLIST STORAGE =====
+
 let wishlist = JSON.parse(localStorage.getItem("wishlist")) || [];
 
 function toggleWishlist(place, btn, icon) {
@@ -23,7 +23,7 @@ function toggleWishlist(place, btn, icon) {
 
 }
 
-// ===== CARD SCROLL OBSERVER =====
+
 const observer = new IntersectionObserver(
   (entries, obs) => {
     entries.forEach(entry => {
@@ -65,33 +65,30 @@ destinations.forEach((place, index) => {
 
       cardsDiv.appendChild(card);
 	  
-	  // ===== WISHLIST CLICK + RESTORE STATE =====
+	
 	  const wishlistBtn = card.querySelector(".wishlist-btn");
 	  const heartIcon = wishlistBtn.querySelector("i");
 
-	  // Restore wishlist state on reload
+	  
 	  if (wishlist.includes(place)) {
 	    wishlistBtn.classList.add("active");
 	    heartIcon.classList.replace("fa-regular", "fa-solid");
 	  }
 
-	  // Instagram-like click behavior
+	  
 	  wishlistBtn.addEventListener("click", () => {
 	    toggleWishlist(place, wishlistBtn, heartIcon);
 
-	    // 🔥 FORCE HEART BOUNCE (INSTAGRAM STYLE)
-		// 🔥 FORCE HEART BOUNCE (INSTAGRAM STYLE)
+	    
 		const heart = wishlistBtn.querySelector(".heart");
 
-		heart.classList.remove("pop");   // reset animation
-		void heart.offsetWidth;          // force reflow
-		heart.classList.add("pop");      // play animation
-
+		heart.classList.remove("pop");   
+		void heart.offsetWidth;          
+		heart.classList.add("pop");      
 	  });
 
 
-      // 🔥 OBSERVE HERE (THIS WAS MISSING)
-	  // stagger reveal
+     
 	  card.style.transitionDelay = `${index * 0.12}s`;
 	  observer.observe(card);
 
@@ -100,7 +97,7 @@ destinations.forEach((place, index) => {
 });
 
 
-// ===== NAVBAR SCROLL SHADOW =====
+
 const navbar = document.querySelector(".navbar");
 
 window.addEventListener("scroll", () => {
@@ -112,7 +109,7 @@ window.addEventListener("scroll", () => {
 });
 
 
-// ===== WISHLIST DROPDOWN LOGIC =====
+
 const wishlistNav = document.getElementById("wishlist-nav");
 const wishlistDropdown = document.getElementById("wishlist-dropdown");
 
