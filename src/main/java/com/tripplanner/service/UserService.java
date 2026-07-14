@@ -32,7 +32,6 @@ public class UserService implements UserDetailsService {
         );
     }
 
-    // This must be INSIDE the class curly braces!
     public User findByUsername(String username) {
         return userRepository.findByUsername(username);
     }
