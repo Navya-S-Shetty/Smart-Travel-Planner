@@ -220,7 +220,7 @@ public class ItineraryService {
         int placesPerDay = switch (pace.toLowerCase()) {
             case "relaxed" -> 3;
             case "packed" -> 6;
-            default -> 4; // balanced
+            default -> 4; 
         };
 
       
@@ -432,7 +432,7 @@ public class ItineraryService {
                 hotelCost =
                     getHotelCost(
                         (List<Map<String, Object>>) dayPlan.get("hotels")
-                    ) / 2;   // per person
+                    ) / 2;  
             }
 
             dayPlan.put("hotelCost", hotelCost);
@@ -653,7 +653,7 @@ public class ItineraryService {
                         leg.getDouble("distance") / 1000; // km
 
                 double legTime =
-                        leg.getDouble("duration") / 60; // minutes
+                        leg.getDouble("duration") / 60; 
 
                 Map<String, Object> m = new HashMap<>();
                 m.put("distanceKm", legDistance);
