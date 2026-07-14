@@ -21,7 +21,7 @@ public class LandmarkController {
     @Autowired
     private UserService userService;
 
-    // This is the endpoint the frontend will call to save a place
+   
     @PostMapping("/save")
     public ResponseEntity<?> saveLandmark(@RequestBody Landmark landmark, Authentication authentication) {
         if (authentication == null) {
@@ -32,7 +32,7 @@ public class LandmarkController {
         return ResponseEntity.ok(saved);
     }
 
-    // This is the endpoint to see the user's saved places
+  
   
     
 }
