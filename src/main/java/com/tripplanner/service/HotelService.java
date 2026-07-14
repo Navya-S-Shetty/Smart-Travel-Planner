@@ -13,12 +13,10 @@ public class HotelService {
     @Autowired
     private HotelRepository hotelRepository;
 
-    // Get all hotels for a region (cluster)
     public List<Hotel> getHotelsByRegion(String region) {
         return hotelRepository.findByRegionIgnoreCase(region);
     }
 
-    // Get hotels by region + hotel type (budget / midrange / luxury)
     public List<Hotel> getHotelsByRegionAndCategory(String region, String category) {
         return hotelRepository.findByRegionIgnoreCaseAndCategoryIgnoreCase(region, category);
     }
