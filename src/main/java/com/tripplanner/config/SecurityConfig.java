@@ -19,7 +19,7 @@ public class SecurityConfig {
     private UserService userService;
 
     @Autowired
-    private PasswordEncoder passwordEncoder; // This pulls from PasswordConfig
+    private PasswordEncoder passwordEncoder; 
 
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
@@ -34,7 +34,7 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-            		// Just add "/api/landmarks/**" to your existing list
+            		
             		.requestMatchers("/", "/index.html", "/signup.html", "/login.html", "/register", "/css/**", "/js/**", "/images/**", "/*.css", "/*.js", "/api/landmarks/**").permitAll()                .anyRequest().authenticated()
             )
             .formLogin(form -> form
